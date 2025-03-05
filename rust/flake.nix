@@ -2,32 +2,55 @@
   description = "Development environment for Rust";
 
   inputs = {
+
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
   };
 
-  outputs = { self, nixpkgs, rust-overlay, ... }:
-    let
-      system = "x86_64-linux";
-
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [ rust-overlay.overlays.default ];
-      };
-
-      toolchain = pkgs.rust-bin.fromRustupToolchainFile ./toolchain.toml;
-    in
+  outputs =
     {
-      devShells.${system}.default = pkgs.mkShell {
-        packages = [
-          toolchain
-          pkgs.rust-analyzer-unwrapped
-        ];
+      self,
+      nixpkgs,
+      flake-utils,
+      rust-overlay,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs {
+          inherit system overlays;
+        };
+      in
+      {
+        devShells.default =
+          with pkgs;
+          mkShell {
+            buildInputs = [
+              openssl
+              pkg-config
+              eza
+              fd
+              (rust-bin.fromRustupToolchainFile ./toolchain.toml)
+            ];
 
-        RUST_SRC_PATH = "${toolchain}/lib/rustlib/src/rust/library";
-      };
-    };
+            shellHook = ''
+              alias ls=eza
+              alias find=fd
+            '';
+          };
+      }
+    );
+
 }
