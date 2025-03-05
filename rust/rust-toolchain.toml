@@ -1,0 +1,5 @@
+[toolchain]
+channel = "nightly"
+components = ["clippy", "rust-analyzer", "rust-src", "rustc", "rustfmt"]
+profile = "complete"
+targets = ["wasm32-unknown-unknown", "x86_64-unknown-linux-gnu"]

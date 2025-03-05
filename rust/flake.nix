@@ -42,12 +42,16 @@
               pkg-config
               eza
               fd
-              (rust-bin.fromRustupToolchainFile ./toolchain.toml)
+              (rust-bin.fromRustupToolchainFile ./rust-toolchain.toml)
             ];
 
             shellHook = ''
+              ## Aliases
               alias ls=eza
               alias find=fd
+
+              ## Cargo path
+              export PATH="$PATH:$HOME/.cargo/bin"
             '';
           };
       }
