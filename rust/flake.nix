@@ -1,14 +1,12 @@
 {
+
   description = "Development environment for Rust";
 
   inputs = {
 
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    flake-utils.url = "github:numtide/flake-utils";
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
@@ -38,14 +36,15 @@
           with pkgs;
           mkShell {
             nativeBuildInputs = with pkgs; [
-              pkg-config
-              gobject-introspection
               cargo
               cargo-tauri
+              gobject-introspection
               nodejs
+              pkg-config
             ];
 
             buildInputs = with pkgs; [
+              (rust-bin.fromRustupToolchainFile ./rust-toolchain.toml)
               at-spi2-atk
               atkmm
               cairo
@@ -55,10 +54,13 @@
               harfbuzz
               librsvg
               libsoup_3
+              openssl
               pango
               webkitgtk_4_1
-              openssl
-              (rust-bin.fromRustupToolchainFile ./rust-toolchain.toml)
+            ];
+
+            packages = with pkgs; [
+              tailwindcss
             ];
 
             shellHook = ''

@@ -1,39 +1,61 @@
 {
+
   description = "Development environment for Java";
 
   inputs = {
+
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+
+    flake-utils.url = "github:numtide/flake-utils";
+
   };
 
-  outputs = { self, nixpkgs, ... }:
-    let
-      javaVersion = 23;
-
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
-
-      forEachSupportedSystem = f: nixpkgs.lib.genAttrs
-        supportedSystems
-        (
-          system: f {
-            pkgs = import nixpkgs { inherit system; };
-          }
-        );
-    in
+  outputs =
     {
-      devShells = forEachSupportedSystem ({ pkgs }: {
-        default = pkgs.mkShell
-          {
+      self,
+      nixpkgs,
+      flake-utils,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        javaVersion = 23;
+        jdk = pkgs."temurin-bin-${toString javaVersion}";
+
+        pkgs = import nixpkgs {
+          inherit system;
+
+          overlays = [
+            (self: super: {
+              gradle = super.gradle.override {
+                java = jdk;
+              };
+
+              lombok = super.lombok.override {
+                jdk = jdk;
+              };
+            })
+          ];
+
+        };
+
+      in
+      {
+        devShells.default =
+          with pkgs;
+          mkShell {
+
             packages = with pkgs; [
-              gcc
-              gradle
               jdk
               maven
+              gradle
+              lombok
             ];
+
+            env = {
+              JAVA_HOME = jdk;
+            };
 
             shellHook =
               let
@@ -43,18 +65,9 @@
               ''
                 export JAVA_TOOL_OPTIONS="${loadLombok}${prev}"
               '';
-          };
-      });
 
-      overlays.default =
-        final: prev:
-        let
-          jdk = prev."jdk${toString javaVersion}";
-        in
-        {
-          maven = prev.maven.override { jdk_headless = jdk; };
-          gradle = prev.gradle.override { java = jdk; };
-          lombok = prev.lombok.override { inherit jdk; };
-        };
-    };
+          };
+      }
+    );
+
 }
