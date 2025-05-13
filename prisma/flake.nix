@@ -1,11 +1,20 @@
 {
-  description = "Development environment for Prisma with PNPM";
+  description = "Prisma development environment";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    pnpm-environment = {
+      url = "github:gabdumal/environments?dir=pnpm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, ... }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      pnpm-environment,
+    }:
     let
       supportedSystems = [
         "x86_64-linux"
@@ -14,45 +23,36 @@
         "aarch64-darwin"
       ];
 
-      forEachSupportedSystem = f: nixpkgs.lib.genAttrs
-        supportedSystems
-        (
-          system: f {
+      forEachSupportedSystem =
+        f:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          f {
             pkgs = import nixpkgs { inherit system; };
           }
         );
     in
     {
-      devShells = forEachSupportedSystem ({ pkgs }: {
-        default = pkgs.mkShell
-          {
-            nativeBuildInputs = with pkgs; [
-              bashInteractive
-            ];
+      devShells = forEachSupportedSystem (
+        { pkgs }:
+        {
+          default = pkgs.mkShell {
 
-            buildInputs = with pkgs; [
-              libuuid
-              openssl
-              prisma-engines
-              python3
-            ];
+            inputsFrom = [ pnpm-environment.devShells.${pkgs.system}.default ];
 
             packages = with pkgs; [
-              ## Typescript
-              nodePackages.nodejs
-              nodePackages.pnpm
-              nodePackages.typescript
-              nodePackages.typescript-language-server
+              prisma-engines
             ];
 
             env = {
-              LD_LIBRARY_PATH = with pkgs; lib.makeLibraryPath [ libuuid openssl ];
-
               PRISMA_QUERY_ENGINE_LIBRARY = "${pkgs.prisma-engines}/lib/libquery_engine.node";
               PRISMA_QUERY_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/query-engine";
               PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
             };
+
           };
-      });
+        }
+      );
     };
+
 }

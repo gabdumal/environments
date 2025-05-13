@@ -16,9 +16,32 @@
         "type": "github"
       }
     },
+    "pnpm-environment": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "pnpm",
+        "lastModified": 1747151230,
+        "narHash": "sha256-h7kGtqBGt59LHD87jAQBiUu1QWVZEUQNwRPS3eGOtd0=",
+        "owner": "gabdumal",
+        "repo": "environments",
+        "rev": "a308af3a24cc876dba7255d18b1e2bbab92611e5",
+        "type": "github"
+      },
+      "original": {
+        "dir": "pnpm",
+        "owner": "gabdumal",
+        "repo": "environments",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "pnpm-environment": "pnpm-environment"
       }
     }
   },
