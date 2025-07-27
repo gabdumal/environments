@@ -38,9 +38,11 @@
             mkShell {
 
               packages = with pkgs; [
+                ## Dependencies
                 bashInteractive
-                cmake
-                doxygen
+                python3
+
+                ## Compilation and debugging tools
                 llvmPackages.clang-tools
                 llvmPackages.bintools
                 llvmPackages.clang
@@ -54,10 +56,15 @@
                 llvmPackages.openmp
                 llvmPackages.stdenv
                 ninja
-                python3
+                vscode-extensions.vadimcn.vscode-lldb
+
+                ## Build tools
+                cmake
+
+                ## Libraries
+                doxygen
                 vcpkg
                 vcpkg-tool
-                vscode-extensions.vadimcn.vscode-lldb
               ];
 
             };

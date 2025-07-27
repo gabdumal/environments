@@ -6,7 +6,10 @@
   };
 
   outputs =
-    { self, nixpkgs }:
+    {
+      self,
+      nixpkgs,
+    }:
     let
       supportedSystems = [
         "x86_64-linux"
@@ -38,6 +41,7 @@
 
               ## Packages
               pnpm
+              nodejs
             ];
 
           };
